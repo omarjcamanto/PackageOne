@@ -1,23 +1,66 @@
-library(tidyverse)
-
-#localize
+# localize_beach() --------------------------------------------------------
+#' localize beach
+#'
+#' @param dat Input data frame
+#'
+#' @return A double vector
+#' @export
+#'
+#' @examples
+#' dat <- dplyr::tribble(
+#' ~name, ~where, ~temp,
+#' "Adam", "beach", 95,
+#' "Bess", "coast", 91,
+#' "Cora", "seashore", 28,
+#' "Dale", "beach", 85,
+#' "Evan", "seaside", 31)
+#' localize_beach(dat)
 localize_beach <- function(dat){
-  lookup_table <- read_csv(
-    "beach-lookup-table.csv",
-    col_types = cols(where = "c", english = "c")
+  lookup_table <- dplyr::tribble(
+    ~where, ~english,
+    "beach", "US",
+    "coast", "US",
+    "seashore", "UK",
+    "seaside", "UK"
   )
-  left_join(dat, lookup_table)
+  dplyr::left_join(dat, lookup_table)
 }
 
-#celsify
-f_to_c <- function(x) (x - 32) * 5/9
+# celsify_temp() ----------------------------------------------------------
+#' Convert to Celsius
+#'
+#' @param dat Input data frame
+#'
+#' @return A double vector
+#' @export
+#'
+#' @examples
+#' dat <- dplyr::tribble(
+#' ~name, ~where, ~temp,
+#' "Adam", "beach", 95,
+#' "Bess", "coast", 91,
+#' "Cora", "seashore", 28,
+#' "Dale", "beach", 85,
+#' "Evan", "seaside", 31)
+#' dat <- localize_beach(dat)
+#' celsify_temp(dat)
 celsify_temp <- function(dat){
-  mutate(dat, temp = if_else(english == "US", f_to_c(temp), temp))
+  dplyr::mutate(dat, temp = dplyr::if_else(english == "US", f_to_c(temp), temp))
 }
 
-#time stamp
-now <- Sys.time()
-timestamp <- function(time) format(time, "%Y-%B-%d_%H-%M-%S")
-outfile_path <- function(infile){
-  paste0(timestamp(now), "_", sub("(.*)([.]csv$)", "\\1_clean\\2", infile))
+# outfile_path() ----------------------------------------------------------
+#' Outfile Path
+#'
+#' @param infile input file name
+#' @param time use can provide a time, but "now is the default.
+#'
+#' @return A character vector
+#' @export
+#'
+#' @examples
+#' infile <- "raw.csv"
+#' outfile_path(infile)
+outfile_path <- function(infile, time = Sys.time()) {
+  ts <- timestamp(time)
+  paste0(ts, "_", sub("(.*)([.]csv$)", "\\1_clean\\2", infile))
 }
